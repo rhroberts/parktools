@@ -2,7 +2,12 @@
 
 ## Project notes
 
-- See [NOTES.md](./NOTES.md) for notes and outstanding issues
+- Running `get_league_batting_data.py` takes a some time
+    - Grab a snack while you wait :p
+
+## TO-DOs
+
+- ...
 
 ## Installation
 
