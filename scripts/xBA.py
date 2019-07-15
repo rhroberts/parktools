@@ -1,46 +1,38 @@
 #!/usr/bin/env python
 # coding: utf-8
+'''
+# Expected Batting Average
 
-# ## Expected Batting Average
-# 
-# ### About
-# 
-# - This project aims to replicate the MLB statcast advanced stat "xBA"
-# 
-# ### Goals
-# 
-# 1) Use supervised ML to predict whether a batted ball is a hit ot an out based on:
-#     - Pitch velo
-#     - Exit velo
-#     - Launch angle
-#     - Hit location
-#     - Hit distance (in case HRs aren't given their own hit location?)
-#     - Batter speed (maybe)
-#     
-# 2) Find the *expected* batting average for a batter given the above parameters for each batted ball in play 
-# 
-# 3) Compare results with statcast's xBA results
-# 
-# ### Data
-# 
-# - Data gathered from baseball savant (statcast) search
-# - Example search query to get all (?) batted balls resulting in outs in 2018 
-#     - https://baseballsavant.mlb.com/statcast_search?hfPT=&hfAB=single%7Cdouble%7Ctriple%7Chome%5C.%5C.run%7Cfield%5C.%5C.out%7Cstrikeout%7Cstrikeout%5C.%5C.double%5C.%5C.play%7Cdouble%5C.%5C.play%7Cgrounded%5C.%5C.into%5C.%5C.double%5C.%5C.play%7Cfielders%5C.%5C.choice%7Cfielders%5C.%5C.choice%5C.%5C.out%7Cforce%5C.%5C.out%7Csac%5C.%5C.bunt%7Csac%5C.%5C.bunt%5C.%5C.double%5C.%5C.play%7Csac%5C.%5C.fly%7Csac%5C.%5C.fly%5C.%5C.double%5C.%5C.play%7Ctriple%5C.%5C.play%7C&hfBBT=&hfPR=&hfZ=&stadium=&hfBBL=&hfNewZones=&hfGT=R%7C&hfC=&hfSea=2018%7C&hfSit=&player_type=batter&hfOuts=&opponent=&pitcher_throws=&batter_stands=&hfSA=&game_date_gt=&game_date_lt=&hfInfield=&team=&position=&hfOutfield=&hfRO=&home_road=&hfFlag=&hfPull=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=h_launch_speed&sort_order=desc&min_pas=0#results
-#     - seems like this returns a maximum of 40,000 results
-# - Data reference
-#     - https://baseballsavant.mlb.com/csv-docs
-# 
-# ### Notes
-# 
-# - My plan is to use 2018 results in the training/test sets to determine 2019 xBA results
-#     - Need to think more about if this is the right strategy
-# - Is it possible to get spray chart info for this?
-# - Having hc_x and hc_y as two separate features doesn't really tell us much, we need the combination of the two as a vector:
-#     - $ hc = \sqrt{hc_y^2 + hc_x^2} \tan(y/x) $
-#     - ATTN: getting weird values here, need to plot to see if it makes sense
+## About
 
-# In[3]:
+- This project aims to replicate the MLB statcast advanced stat "xBA"
 
+## Goals
+
+1) Use supervised ML to predict whether a batted ball is a hit ot an out based on:
+    - Exit velo
+    - Launch angle
+    - Spray angle
+    - Note: other features from statcast data ended up not improving the model
+    
+2) Find the *expected* batting average for a batter given the above parameters for each batted ball in play 
+
+3) Compare results with statcast's xBA results
+
+## Data
+
+- Data gathered from baseball savant (statcast) search
+- Example search query to get all (?) batted balls resulting in outs in 2018 
+    - https://baseballsavant.mlb.com/statcast_search?hfPT=&hfAB=single%7Cdouble%7Ctriple%7Chome%5C.%5C.run%7Cfield%5C.%5C.out%7Cstrikeout%7Cstrikeout%5C.%5C.double%5C.%5C.play%7Cdouble%5C.%5C.play%7Cgrounded%5C.%5C.into%5C.%5C.double%5C.%5C.play%7Cfielders%5C.%5C.choice%7Cfielders%5C.%5C.choice%5C.%5C.out%7Cforce%5C.%5C.out%7Csac%5C.%5C.bunt%7Csac%5C.%5C.bunt%5C.%5C.double%5C.%5C.play%7Csac%5C.%5C.fly%7Csac%5C.%5C.fly%5C.%5C.double%5C.%5C.play%7Ctriple%5C.%5C.play%7C&hfBBT=&hfPR=&hfZ=&stadium=&hfBBL=&hfNewZones=&hfGT=R%7C&hfC=&hfSea=2018%7C&hfSit=&player_type=batter&hfOuts=&opponent=&pitcher_throws=&batter_stands=&hfSA=&game_date_gt=&game_date_lt=&hfInfield=&team=&position=&hfOutfield=&hfRO=&home_road=&hfFlag=&hfPull=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=h_launch_speed&sort_order=desc&min_pas=0#results
+    - seems like this returns a maximum of 40,000 results
+- Data reference
+    - https://baseballsavant.mlb.com/csv-docs
+- See get_league_batting_data.py
+
+## Notes
+
+- My plan is to use 2018 results in the training/test sets to determine 2019 xBA results
+'''
 
 import os
 import pandas as pd
@@ -53,20 +45,14 @@ from sklearn import neighbors
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap
-from confusion import plot_confusion_matrix
-import seaborn as sns
-from IPython.display import display, clear_output
-get_ipython().run_line_magic('matplotlib', 'inline')
+from pyxBA.tools import plot_confusion_matrix
 
-# field_hits = ['single', 'double', 'triple']
-# # any ball hit in play that counts as an AB bit isn't a hit
-# field_outs = [
-#     'field_out', 'force_out', 'grounded_into_double_play',
-#     'double_play', 'field_error', 'fielders_choice', 'fielders_choice_out',
-#     'triple_play'
-# ]
-# sacs = ['sac_fly', 'sac_bunt', 'sac_bunt_double_play', 'sac_fly_double_play']
-# Ks = ['strikeout', 'strikeout_double_play']
+
+def calc_BA(data):
+    hits_total = len(data.loc[data['events'].isin(hits)])
+    outs_total = len(data.loc[data['events'].isin(outs_AB)])
+    return(hits_total/(hits_total + outs_total))
+
 
 hits = ['single', 'double', 'triple', 'home_run']
 outs_AB = [  
@@ -78,6 +64,7 @@ outs_AB = [
 def spray_angle(df):
     '''
         Calculate spray angle from hc_x and hc_y in statcast csv output
+        ref: https://tht.fangraphs.com/research-notebook-new-format-for-statcast-data-export-at-baseball-savant/
     '''
     # make home plate (0,0)
     hc_x = df['hc_x'] - 125.42
@@ -114,19 +101,10 @@ def pre_process(data):
     X, y = df[features], df['outcome']
     return(X, y, df)
 
-def calc_BA(data):
-    hits_total = len(data.loc[data['events'].isin(hits)])
-    outs_total = len(data.loc[data['events'].isin(outs_AB)])
-    return(hits_total/(hits_total + outs_total))
-
     
 # import and pre-process the data
 data = pd.read_csv('data/all_outcomes_2018.csv')
 X, y, df = pre_process(data)
-
-
-# In[4]:
-
 
 df.events.value_counts()
 

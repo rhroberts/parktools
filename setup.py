@@ -2,17 +2,16 @@ from setuptools import setup, find_packages
 
 
 setup(
-        name='kfit',
+        name='pyxBA',
         version='0.1.0',
-        description='Simple, graphical spectral fitting in Python.',
+        description='Tools for caclulating expected batting averages.',
         packages=find_packages(),
         install_requires=[
             'pandas',
             'scipy',
             'numpy',
             'matplotlib',
-            'lmfit',
-            'PyQt5',
-            'pyperclip'
+            'sklearn',
+            'pybaseball'
     ]
 )
