@@ -4,13 +4,16 @@
 from sklearn.metrics import confusion_matrix
 from sklearn.utils.multiclass import unique_labels
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 from pybaseball import statcast, playerid_lookup
 
 def get_league_batting_data(start_dt='2018-03-29',
                             end_dt='2018-10-01',
-                            fname_all='all_outcomes_2018.csv',
-                            fname_bb='batted_balls_2018.csv',
+                            # fname_all='all_outcomes_2018.csv',
+                            # fname_bb='batted_balls_2018.csv',
+                            fname_all = None,
+                            fname_bb = None,
                             features = [
                                 'events',
                                 'description',
@@ -31,42 +34,48 @@ def get_league_batting_data(start_dt='2018-03-29',
     https://github.com/jldbc/pybaseball
     https://baseballsavant.mlb.com/statcast_search
 
-    Arguments:
+    Arguments
         start_dt: get data from start_dt forward
         stop_dt:  get data up to stop_dt
         fname_all: export csv of all statcast at bat outcomes to this file
             **must be .csv**
         fname_bb: export csv of all outcomes with a batted ball to this file
             **must be .csv**
+
+    Returns
+        (all_outcomes, batted_balls) tuple of dataframes
     """
 
     # get statcast data (this can take awhile)
     df = statcast(start_dt, end_dt)
     # discard null events
-    outcomes = df[df['events'].notnull()]
+    all_outcomes = df[df['events'].notnull()]
     
     # get the specified features only
-    select = outcomes[features]
+    all_outcomes = all_outcomes[features]
     
-    # export to csv
-    select.to_csv(fname_all, index=False)
+    if fname_all is not None:
+        # export to csv
+        all_outcomes.to_csv(fname_all, index=False)
+        print('Exported: {}'.format(fname_all))
     
     # BATTED BALLS ONLY
     # when launch angle, launch speed, and hc_(x,y) are null, it's a strikeout, walk, etc
-    batted_balls = select.dropna()
+    batted_balls = all_outcomes.dropna()
     batted_balls.reset_index(inplace=True, drop=True)
     # add column to specify whether batted ball was a hit
+    batted_balls = batted_balls.copy()
     batted_balls['hit'] = batted_balls['events'].isin(['single', 'double', 'triple', 'home_run'])
     
     # convert batter id to int
     batted_balls['batter'] = batted_balls['batter'].apply(int)
     
-    # export data
-    batted_balls.to_csv(fname_bb, index=False)
+    if fname_bb is not None:
+        # export data
+        batted_balls.to_csv(fname_bb, index=False)
+        print('Exported: {}'.format(fname_bb))
 
-    print('Exported:')
-    print('\t' + fname_all)
-    print('\t' + fname_bb)
+    return(all_outcomes, batted_balls)
 
 
 def filter_player_batting_data(league_data='all_outcomes_2018.csv',
@@ -103,7 +112,9 @@ def filter_player_batting_data(league_data='all_outcomes_2018.csv',
     league_df = pd.read_csv(league_data)
     player_df = league_df[league_df['batter'] == mlbam_id]
     player_df.reset_index(inplace=True, drop=True)
-    player_df.to_csv(fname, index=False)
+    if fname is not None:
+        player_df.to_csv(fname, index=False)
+    return(player_df)
 
 
 def calc_BABIP(batted_ball_data):
@@ -118,10 +129,12 @@ def calc_BABIP(batted_ball_data):
         float BABIP
     """
 
+    df = pd.read_csv(batted_ball_data)
     # BABIP = (Hits - HR)/(AB-K-HR-SF)
-    c = batted_ball_data['events'].value_counts()
+    counts = df['events'].value_counts()
     BABIP = (
-        (c['single'] + c['double'] + c['triple'])/(c.sum() - c['home_run'])
+        (counts['single'] + counts['double'] + counts['triple'])/\
+                (counts.sum() - counts['home_run'])
     )
     return(BABIP)
 
