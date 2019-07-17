@@ -1,4 +1,6 @@
-# xBA
+# parktools
+
+Python tools for the ballpark
 
 ## Project notes
 
@@ -11,9 +13,18 @@
 
 ## Installation
 
-To run the scripts in this repo, you'll need...
+1. Install `git` if you don’t have it already
+
+   ​	`apt install git`
+
+2. Clone the repository and install the required dependencies
+
+```bash
+git clone https://github.com/rhroberts/parktools.git
+cd parktools
+pip install ./
+```
 
 ### Dependencies
 
-1. ...
-2. ...
+`pandas`, `scipy`, `numpy`, `matplotlib`, `scikit-learn`, `pybaseball`
