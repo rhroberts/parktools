@@ -513,4 +513,3 @@ for col in select._get_numeric_data():
 select['diff_diff'] = select['xBA'] - select['xBA_sc']
 select.sort_values('diff_diff', ascending=False)
 select
-

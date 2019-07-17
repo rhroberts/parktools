@@ -1,7 +1,0 @@
-README.md
-setup.py
-pyxBA.egg-info/PKG-INFO
-pyxBA.egg-info/SOURCES.txt
-pyxBA.egg-info/dependency_links.txt
-pyxBA.egg-info/requires.txt
-pyxBA.egg-info/top_level.txt
