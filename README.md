@@ -7,15 +7,15 @@ Python tools for the ballpark
 - Running `get_league_batting_data.py` takes a some time
     - Grab a snack while you wait :p
 
-## TO-DOs
+## To-Do
 
 - ...
 
 ## Installation
 
-1. Install `git` if you don’t have it already
+1. Install [git](https://git-scm.com/downloads) if you don’t have it already
 
-   ​	`apt install git`
+   ​	e.g.  `apt-get install git` on Debian/Ubuntu
 
 2. Clone the repository and install the required dependencies
 
