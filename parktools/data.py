@@ -167,3 +167,58 @@ def filter_batting_player(league_data='all_outcomes_2018.csv', player_last='Voge
     if fname is not None:
         player_df.to_csv(fname, index=False)
     return(player_df)
+
+def spray_angle(outcomes):
+    '''
+        Calculate spray angle from hc_x and hc_y columns in outcomes dataframe
+        Adds returns the same outcomes dataframe within an added 'spray_angle' column
+
+        ref: https://tht.fangraphs.com/research-notebook-new-format-for-statcast-data-export-at-baseball-savant/
+    '''
+    # make home plate (0,0)
+    hc_x = outcomes['hc_x'] - 125.42
+    hc_y = 198.27 - outcomes['hc_y']
+    outcomes['spray_angle'] = np.arctan(hc_x/hc_y)
+    outcomes.loc[outcomes['stand'] == 'L', 'spray_angle'] = -outcomes.loc[outcomes['stand'] == 'L', 'spray_angle']
+    # convert to degrees
+    outcomes['spray_angle'] = outcomes['spray_angle'].apply(np.rad2deg)
+    return(outcomes)
+
+def pre_process(outcomes, features=['launch_speed', 'launch_angle', 'spray_angle'], label='hit'):
+    '''
+    Process outcomes dataframe for a machine learning model
+
+    Arguments
+        outcomes: dataframe - returned by get_batting_league(), get_batting_player(), etc
+        label: array - columns from outcomes to use as the label (in the machine learning sense) in the model
+        outcome: str - column to use as outcom
+    '''
+    # define hits and outs that count as an at-bat
+    hits = ['single', 'double', 'triple', 'home_run']
+    outs_AB = [  
+        'strikeout', 'field_out', 'grounded_into_double_play',
+        'force_out', 'double_play', 'field_error', 'fielders_choice',
+        'fielders_choice_out', 'batter_interference',
+        'strikeout_double_play', 'triple_play'
+    ]
+    # copy to new dataframe
+    outcomes = outcomes.copy()
+    # !! this is imposing the babip stuff, remove?
+    outcomes = outcomes[outcomes.events.isin([*hits, *outs_AB])]
+    # add hit columns if default label='hit' is used
+    if label == 'hit':
+        # add hit outcome column (0: out_AB, 1: hit)
+        outcomes[label] = 0
+        outcomes.loc[outcomes.events.isin(hits), label] = 1
+    # calculate spray angle from hc_x and hc_y if it not already in outcomes
+    if 'spray_angle' not in outcomes:
+        outcomes = spray_angle(outcomes)
+    # set launch/spray angle/speed = 0 for strikeouts
+    # these events count for *most* of the NaN values here
+    # check with > outcomes.loc[outcomes.launch_speed.isnull(), 'events'].value_counts()
+    outcomes.loc[outcomes.events.isin(['strikeout', 'strikeout_double_play']), [*features, 'hc_x', 'hc_y']] = 0
+    # drop remaining rows with NaN
+    outcomes.dropna(inplace=True)
+    # break into features (X) and outcomes (y)
+    X, y = outcomes[features], outcomes[[label]]
+    return(X, y, outcomes)

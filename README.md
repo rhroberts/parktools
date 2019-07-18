@@ -2,15 +2,6 @@
 
 Python tools for the ballpark
 
-## Project notes
-
-- Running `get_league_batting_data.py` takes a some time
-    - Grab a snack while you wait :p
-
-## To-Do
-
-- ...
-
 ## Installation
 
 1. Install [git](https://git-scm.com/downloads) if you don’t have it already
@@ -28,3 +19,13 @@ pip install ./
 ### Dependencies
 
 `pandas`, `scipy`, `numpy`, `matplotlib`, `scikit-learn`, `pybaseball`
+
+## Project Notes and To-Do
+
+- See 
+
+  []: 
+
+  
+
+## 
