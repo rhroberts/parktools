@@ -22,9 +22,7 @@ pip install ./
 
 ## Project Notes and To-Do
 
-- See 
-
-  []: 
+- See [NOTES.md](./NOTES.md) for more info and tasks currently underway
 
   
 
