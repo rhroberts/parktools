@@ -2,20 +2,21 @@
     Tools for calculating xBA
 '''
 from sklearn.metrics import confusion_matrix
-from sklearn.utils.multiclass import unique_labels
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from pybaseball import statcast, playerid_lookup
 
 
 def calc_BABIP(batted_ball_data):
     """
-    Calculate batting average on balls in play from statcast batted ball data returned from get_league_batting_data() or get_player_batting_data()
-    This doesn't always perfectly match published results, but it's a good sanity check to make sure results are close to actual values
+    Calculate batting average on balls in play from statcast batted ball data
+    returned from get_league_batting_data() or get_player_batting_data().
+    This doesn't always perfectly match published results, but it's a good
+    sanity check to make sure results are close to actual values.
 
     Arguments
-        batted_balls_data: .csv output from get_league_batting_data() or filter_player_batting_data()
+        batted_balls_data: .csv output from get_league_batting_data() or
+                           filter_player_batting_data()
 
     Returns
         float BABIP
@@ -25,8 +26,8 @@ def calc_BABIP(batted_ball_data):
     # BABIP = (Hits - HR)/(AB-K-HR-SF)
     counts = df['events'].value_counts()
     BABIP = (
-        (counts['single'] + counts['double'] + counts['triple'])/\
-                (counts.sum() - counts['home_run'])
+        (counts['single'] + counts['double'] + counts['triple']) /
+        (counts.sum() - counts['home_run'])
     )
     return(BABIP)
 
@@ -38,7 +39,9 @@ def plot_confusion_matrix(y_true, y_pred, classes,
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
-    Adapted from: https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html#sphx-glr-auto-examples-model-selection-plot-confusion-matrix-py
+    Adapted from: "https://scikit-learn.org/stable/auto_examples/
+        model_selection/plot_confusion_matrix.html#sphx-glr-auto-examples-
+        model-selection-plot-confusion-matrix-py"
 
     Arguments
         y_true: test set outcomes
