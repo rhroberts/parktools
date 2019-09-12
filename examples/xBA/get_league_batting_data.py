@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 '''
-Get batted ball data for entire league
+Get batting data for entire league, save files with all outcomes and with
+batted balls only.
 '''
 from parktools.data import get_batting_league
 

@@ -1,71 +1,34 @@
 #!/usr/bin/env python3
 # coding: utf-8
 '''
+Compare our results from calc_player_xBAs_2019.py with the official
+MLB/baseballsavant xBA values.
 '''
-
 import pandas as pd
-import numpy as np
-from parktools.data import pre_process
-from parktools.tools import calc_BA, plot_confusion_matrix
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn import neighbors
 
-# import and process batting data
-data = pd.read_csv('data/all_outcomes_2018.csv', index_col=0)
-X, y, df = pre_process(data)
+calc_xBA = pd.read_csv('data/xBA_results_2019.csv', index_col=0)
+statcast_xBA = pd.read_csv('ref_data/expected_stats_baseballsavant.csv')
 
-# split up data into train, test
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, random_state=0
+# clean up and join dataframes
+calc_xBA.drop('BA', axis=1, inplace=True)
+calc_xBA.columns = ['first_name', 'last_name', 'xBA_calc']
+statcast_xBA.set_index('player_id', drop=True, inplace=True)
+statcast_xBA = statcast_xBA[[' first_name', 'last_name', 'est_ba', 'ba']]
+statcast_xBA.columns = ['first_name', 'last_name', 'xBA_mlb', 'actual_BA']
+xBA_compare = calc_xBA.join(
+    statcast_xBA, on=calc_xBA.index, how='left', rsuffix='_'
 )
-
-# K-Nearest Neighbors
-nn = 31
-clf = neighbors.KNeighborsClassifier(nn)
-clf.fit(X, y)
-
-print('Accuracy of KNN classifier on training set: {:.2f}'
-      .format(clf.score(X_train, y_train)))
-print('Accuracy of KNN classifier on test set: {:.2f}'
-      .format(clf.score(X_test, y_test)))
-
-# calculate expected batting average for a couple players
-dee = pd.read_csv('data/dee_gordon_2019.csv')
-edwin = pd.read_csv('data/edwin_encarnacion_2019.csv')
-
-X_dee, y_dee, df_dee = pre_process(dee)
-X_edwin, y_edwin, df_edwin = pre_process(edwin)
-
-predicted_outcomes_dee = clf.predict(X_dee)
-unique, counts = np.unique(predicted_outcomes_dee, return_counts=True)
-d = dict(zip(unique, counts))
-# hit=1, out=0
-xBA_dee = d[1]/(d[0] + d[1])
-
-predicted_outcomes_edwin = clf.predict(X_edwin)
-unique, counts = np.unique(predicted_outcomes_edwin, return_counts=True)
-d = dict(zip(unique, counts))
-xBA_edwin = d[1]/(d[0] + d[1])
-
-BA_dee = calc_BA('data/dee_gordon_2019.csv')
-BA_edwin = calc_BA('data/edwin_encarnacion_2019.csv')
-
-print('\nExpected Batting Average for Dee Gordon: {:.3f}'.format(xBA_dee))
-print('Actual Batting Average: {:.3f}\n'.format(BA_dee))
-print('\nExpected Batting Average for Edwin Encarnacion: {:.3f}'
-      .format(xBA_edwin))
-print('Actual Batting Average: {:.3f}\n'.format(BA_edwin))
-
-plt.style.use('fivethirtyeight')
-fig, ax = plot_confusion_matrix(
-    y_dee, predicted_outcomes_dee, ['out', 'hit'], normalize=True,
-    title='Dee Gordon, N = {}'.format(nn)
-)
-fig.savefig('plots/confusion_matrix_dee_N{}.png'.format(nn))
-plot_confusion_matrix(
-    y_edwin, predicted_outcomes_edwin, ['out', 'hit'], normalize=True,
-    title='Edwin Encarnacion, N = {}'.format(nn)
-)
-fig.savefig('plots/confusion_matrix_edwin_N{}.png'.format(nn))
-plt.show()
+# drop duplicate columns
+xBA_compare.drop(['first_name_', 'last_name_'], axis=1, inplace=True)
+xBA_compare.sort_values('actual_BA', ascending=False, inplace=True)
+xBA_compare = xBA_compare.round(3)
+print(xBA_compare)
+# calculate average difference between calculated and MLB xBA
+diff = (xBA_compare['xBA_calc'] -
+        xBA_compare['xBA_mlb']).abs().sum()/xBA_compare.shape[0]
+diff = round(diff, 3)
+print('\nAverage difference between calculated and MLB xBA: {}'.format(diff))
+# export results
+fname = 'data/xBA_compare_2019.csv'
+xBA_compare.to_csv(fname)
+print("xBA results exported to '{}'".format(fname))

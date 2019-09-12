@@ -35,4 +35,5 @@
 
 ## Results
 
-- Execute `run_all` to get all of the demo results. It will take some time -- possibly more than an hour.
+- Execute `run_all` to query the necessary data from https://baseballsavant.mlb.com/ and get all of the demo results. Querying data will take some time (~15 min).
+- Previous query results are available in the data folder. To run the demo using those results, execute `run_noquery`. This should only take a minute or so.

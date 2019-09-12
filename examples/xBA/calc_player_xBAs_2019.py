@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # coding: utf-8
 '''
+Using the model from model_text.py, calculate 2019 expected batting averages
+for players with > 300 at bats.
 '''
 import pickle
 import pandas as pd
@@ -40,13 +42,14 @@ for i, pid in enumerate(AB300):
     # hit=1, out=0
     xBA = d[1]/(d[0] + d[1])
     # calculate standard BA
-    cBA = calc_BA(pdata, from_file=False)
+    cBA = calc_BA(dfp, from_file=False)
     xBA_dict[pid] = [pfirst, plast, round(cBA, 3), round(xBA, 3)]
 
 # convert to datafrom and save results to csv
 xBA_df = pd.DataFrame.from_dict(xBA_dict, orient='index')
 xBA_df.columns = ['first_name', 'last_name', 'BA', 'xBA']
+xBA_df.index = [int(x) for x in xBA_df.index]
 xBA_df.index.name = 'player_id'
 xBA_df.sort_values('BA', inplace=True, ascending=False)
 print('\n{}'.format(xBA_df))
-xBA_df.to_csv('xBA_results_2019.csv')
+xBA_df.to_csv('data/xBA_results_2019.csv')

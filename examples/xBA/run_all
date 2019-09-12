@@ -1,7 +1,20 @@
 #!/bin/sh
 
+printf "\n~~~ This Script Calculates Expected Batting Averages with a KNN Model ~~~\n"
+
+printf "\n... querying league-wide batting data from https://baseballsavant.mlb.com/ ...\n\n"
 ./get_league_batting_data.py
-./get_player_batting_data.py
+printf "\n... visualizing the features in the dataset (see 'data/feature_exploration.png')"
 ./feature_exploration.py
+printf "\n... querying player-specific batting data for testing the model ...\n\n"
+./get_player_batting_data.py
+printf "\n... building, testing, and saving the KNN model ...\n\n"
 ./model_test.py
+printf "\n... calculating xBAs for individual players using model ...\n\n"
 ./get_player_xBAs_2019.py
+printf "\n... comparing results with MLB's xBA ...\n\n"
+./compare_mlb_xBA.py
+
+printf "\n~~~ Top 20 Players by Batting Average, with Calculated and MLB xBA for Comparison ~~~\n\n"
+head -n 20 data/xBA_compare_2019.csv
+printf "\n~~~ Done. ~~~\n\n"

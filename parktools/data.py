@@ -230,7 +230,7 @@ def pre_process(outcomes, features=[
     ]
     # copy to new dataframe
     outcomes = outcomes.copy()
-    # !! this is imposing the babip stuff, remove?
+    # !! this is imposing the ba/babip stuff
     outcomes = outcomes[outcomes.events.isin([*hits, *outs_AB])]
     # add hit columns if default label='hit' is used
     if label == 'hit':

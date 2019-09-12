@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 '''
-Get batted ball data for entire league
+Get batting data for specific players to use in model testing. We select two
+very different hitter types (fast, contact hitter & slow, power hitter) to make
+sure the model can adequately represent both extremes.
 '''
 from parktools.data import get_batting_player
 
