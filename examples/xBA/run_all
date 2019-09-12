@@ -1,0 +1,7 @@
+#!/bin/sh
+
+./get_league_batting_data.py
+./get_player_batting_data.py
+./feature_exploration.py
+./model_test.py
+./get_player_xBAs_2019.py

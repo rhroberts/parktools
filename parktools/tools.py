@@ -1,13 +1,45 @@
 '''
     Tools for calculating xBA
 '''
-from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
 
 
-def calc_BABIP(batted_ball_data):
+def calc_BA(batting_data, from_file=True):
+    """
+    Calculate batting average from statcast batting data
+    returned from get_league_batting_data() or get_player_batting_data().
+    This doesn't always perfectly match published results, but it's a good
+    sanity check to make sure results are close to actual values.
+
+    Arguments
+        batting_data: 'all_outcomes' .csv file (or dataframe) produced from
+                      get_league_batting_data() or filter_player_batting_data()
+
+    Returns
+        float batting average
+    """
+    if from_file:
+        df = pd.read_csv(batting_data)
+    else:
+        df = batting_data
+    # BA = Hits/AB
+    counts = df['events'].value_counts()
+    # need to be careful, since players might not have a certain hit type over
+    # a small sample
+    for hit_type in ['single', 'double', 'triple', 'home_run']:
+        if hit_type not in counts:
+            counts[hit_type] = 0
+    BA = (
+        counts['single'] + counts['double'] + counts['triple'] +
+        counts['home_run']
+    ) / counts.sum()
+    return(BA)
+
+
+def calc_BABIP(batted_ball_data, from_file=True):
     """
     Calculate batting average on balls in play from statcast batted ball data
     returned from get_league_batting_data() or get_player_batting_data().
@@ -15,16 +47,24 @@ def calc_BABIP(batted_ball_data):
     sanity check to make sure results are close to actual values.
 
     Arguments
-        batted_balls_data: .csv output from get_league_batting_data() or
+        batted_balls_data: 'batted_balls' .csv file (or dataframe) produced
+                           from get_league_batting_data() or
                            filter_player_batting_data()
 
     Returns
         float BABIP
     """
-
-    df = pd.read_csv(batted_ball_data)
+    if from_file:
+        df = pd.read_csv(batted_ball_data)
+    else:
+        df = batted_ball_data
     # BABIP = (Hits - HR)/(AB-K-HR-SF)
     counts = df['events'].value_counts()
+    # need to be careful, certain hit types may not occur over
+    # a small sample
+    for hit_type in ['single', 'double', 'triple', 'home_run']:
+        if hit_type not in counts:
+            counts[hit_type] = 0
     BABIP = (
         (counts['single'] + counts['double'] + counts['triple']) /
         (counts.sum() - counts['home_run'])
@@ -76,12 +116,15 @@ def plot_confusion_matrix(y_true, y_pred, classes,
     # We want to show all ticks...
     ax.set(xticks=np.arange(cm.shape[1]),
            yticks=np.arange(cm.shape[0]),
+           ylim=[-0.5, cm.shape[0]-0.5],
            # ... and label them with the respective list entries
            xticklabels=classes, yticklabels=classes,
            title=title,
            ylabel='True label',
            xlabel='Predicted label')
 
+    # ensure gridlines aren't visible
+    ax.grid(False, which='both', axis='both')
     # Rotate the tick labels and set their alignment.
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
              rotation_mode="anchor")
@@ -95,4 +138,4 @@ def plot_confusion_matrix(y_true, y_pred, classes,
                     ha="center", va="center",
                     color="white" if cm[i, j] > thresh else "black")
     fig.tight_layout()
-    return ax
+    return fig, ax

@@ -8,7 +8,7 @@ from pybaseball import statcast, statcast_batter, playerid_lookup
 
 def filter_batted_balls(all_outcomes):
     """
-    Filter out batted ball data from all_outcomes dataframe returned by
+    Filter batted ball data from all_outcomes dataframe returned by
     get_batting_league() or get_batting_player()
 
     Arguments
@@ -57,7 +57,11 @@ def get_batting_league(
 
     Returns
         (all_outcomes, batted_balls) tuple of dataframes
-            Saves to files 'fname_all' and 'fname_bb' if fname is not None
+            Saves to files 'fname_all' and 'fname_bb' if fname is not None.
+            Note that all_outcomes DOES NOT include plate appearances that do
+            not count as at bats.
+            TODO: output truly all outcomes, all at bats, and all batted balls
+            as three separate files.
     """
 
     # get statcast data (this can take awhile)
@@ -101,7 +105,8 @@ def get_batting_player(
     Arguments
         start_dt: get data from start_dt forward
         stop_dt:  get data up to stop_dt
-        player_id: mlb_am id
+        player_last: player's last name
+        player_first: player's first name
         fname_all: export csv of all statcast at bat outcomes to this file
             **must be .csv**
         fname_bb: export csv of all outcomes with a batted ball to this file
@@ -211,9 +216,9 @@ def pre_process(outcomes, features=[
     Arguments
         outcomes: dataframe - returned by get_batting_league(),
                               get_batting_player(), etc
-        label: array - columns from outcomes to use as the label (in the
+        features: array - columns from outcomes to use as the label (in the
                        machine learning sense) in the model
-        outcome: str - column to use as outcome
+        label: str - column to use as outcome
     '''
     # define hits and outs that count as an at-bat
     hits = ['single', 'double', 'triple', 'home_run']
