@@ -1,7 +1,5 @@
 # parktools
 
-Python tools for the ballpark!
-
 This project is in *very* early days. It is an attempt to generalize some python code I use frequently when looking at baseball data. Over time, I hope to build it out into a nice collection of tools with which to query, process, and analyze MLB and MiLB data. `parktools` relies heavily on the very awesome [pybaseball](https://github.com/jldbc/pybaseball) package.
 
 ## Installation
