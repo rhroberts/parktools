@@ -9,7 +9,7 @@ printf "\n... querying player-specific batting data for testing the model ...\n\
 printf "\n... building, testing, and saving the KNN model ...\n\n"
 ./model_test.py
 printf "\n... calculating xBAs for individual players using model ...\n\n"
-./get_player_xBAs_2019.py
+./calc_player_xBAs_2019.py
 printf "\n... comparing results with MLB's xBA ...\n\n"
 ./compare_mlb_xBA.py
 

@@ -69,7 +69,7 @@ fig, ax = plot_confusion_matrix(
     title='Dee Gordon, N = {}'.format(nn)
 )
 fig.savefig('plots/confusion_matrix_dee_N{}.png'.format(nn))
-plot_confusion_matrix(
+fig, ax = plot_confusion_matrix(
     y_edwin, predicted_outcomes_edwin, ['out', 'hit'], normalize=True,
     title='Edwin Encarnacion, N = {}'.format(nn)
 )

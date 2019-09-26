@@ -7,7 +7,7 @@ printf "\n... querying league-wide batting data from https://baseballsavant.mlb.
 printf "\n... visualizing the features in the dataset (see 'data/feature_exploration.png')"
 ./feature_exploration.py
 printf "\n... querying player-specific batting data for testing the model ...\n\n"
-./get_player_batting_data.py
+./calc_player_batting_data.py
 printf "\n... building, testing, and saving the KNN model ...\n\n"
 ./model_test.py
 printf "\n... calculating xBAs for individual players using model ...\n\n"

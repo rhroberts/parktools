@@ -14,6 +14,6 @@ setup(
             'numpy',
             'matplotlib',
             'sklearn',
-            'pybaseball'
+            'pybaseball',
         ]
 )
