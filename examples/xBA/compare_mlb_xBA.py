@@ -25,7 +25,7 @@ xBA_compare = xBA_compare.round(3)
 print(xBA_compare)
 # calculate average difference between calculated and MLB xBA
 diff = (xBA_compare['xBA_calc'] -
-        xBA_compare['xBA_mlb']).abs().sum()/xBA_compare.shape[0]
+        xBA_compare['xBA_mlb']).sum()/xBA_compare.shape[0]
 diff = round(diff, 3)
 print('\nAverage difference between calculated and MLB xBA: {}'.format(diff))
 # export results
